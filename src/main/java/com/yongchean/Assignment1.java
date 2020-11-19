@@ -8,7 +8,7 @@ import org.jsoup.select.Elements;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 
 
@@ -94,12 +94,14 @@ public class Assignment1 {
     }
 
     //Print all the github information to console and excel
-        private static void Result() {
+    private static void Result() {
         try {
-            Workbook xlsx_workbook = new HSSFWorkbook();
-            Sheet sheet1 = xlsx_workbook.createSheet("github");
+            Workbook xlsx_workbook = new XSSFWorkbook();
+            xlsx_workbook.createSheet("github");
+            Sheet get_sheet = xlsx_workbook.getSheetAt(0);
             String[] header1 = {"No.", "Matric", "Name", "GitHub Link"};
-            String[] header2 =  {"No.", "Matric", "Name"};
+            String[] header2 =  {"No.", "Matric", "Name", "Comment Numbers"};
+
             //Font header_font = xlsx_workbook.createFont();
             //header_font.setBold(true);
 
@@ -111,73 +113,167 @@ public class Assignment1 {
             System.out.printf("| %-3s | %-6s | %-35s | %-35s |\n", "No.", "Matric", "Name", "GitHub Link");
             System.out.println("|_____|________|_____________________________________|_____________________________________|");
             //int counter_for_submitted = 1;
-            int row_counter = 0;
+            int sheet1_row_counter = 0;
+            int i = 0;
             for (Student student : student_list) {
                 if (!student.get_link().equals("")) {
-                    System.out.printf("| %-3s | %-6s | %-35s | %-35s |\n", student.get_number(), student.get_matric(), student.get_name(), student.get_link());
-                    Row row = sheet1.createRow(row_counter);
+                    i++;
+                    System.out.printf("| %-3s | %-6s | %-35s | %-35s |\n", i, student.get_matric(), student.get_name(), student.get_link());
+                    Row row = get_sheet.createRow(sheet1_row_counter);
+                    if (sheet1_row_counter == 0) {
+                        Cell cell1 = row.createCell(0);
+                        Cell cell2 = row.createCell(1);
+                        Cell cell3 = row.createCell(2);
+                        Cell cell4 = row.createCell(3);
+                        cell1.setCellValue(header1[0]);
+                        cell2.setCellValue(header1[1]);
+                        cell3.setCellValue(header1[2]);
+                        cell4.setCellValue(header1[3]);
+                        sheet1_row_counter++;
+                        row = get_sheet.createRow(sheet1_row_counter);
+                    }
                     Cell cell1 = row.createCell(0);
                     Cell cell2 = row.createCell(1);
                     Cell cell3 = row.createCell(2);
                     Cell cell4 = row.createCell(3);
-                    cell1.setCellValue(student.get_number());
+                    cell1.setCellValue(i);
                     cell2.setCellValue(student.get_matric());
                     cell3.setCellValue(student.get_name());
-                    cell3.setCellValue(student.get_link());
-                    row_counter++;
+                    cell4.setCellValue(student.get_link());
+                    sheet1_row_counter++;
                     //System.out.printf("| %-3s | %-6s | %-35s | %-35s |  %-15s %d\n", student.get_number(), student.get_matric(), student.get_name(), student.get_link(), student.get_github_id(), student.get_comment_number());
                     //counter_for_submitted++;
                 }
             }
             System.out.println("____________________________________________________________________________________________");
-            FileOutputStream excel_file = new FileOutputStream("issues-result");
-            xlsx_workbook.write(excel_file);
-            xlsx_workbook.setHidden(false);
-            excel_file.close();
-            //xlsx_workbook.close();
 
             System.out.println();
             System.out.println(" * Students who have not submitted the GitHub account");
             System.out.println("______________________________________________________");
             System.out.printf("| %-3s | %-6s | %-35s |\n", "No.", "Matric", "Name");
             System.out.println("|_____|________|_____________________________________|");
+            sheet1_row_counter = 0;
+            i = 0;
             for (Student student : student_list) {
                 if (student.get_link().equals("")) {
-                    System.out.printf("| %-3s | %-6s | %-35s |\n", student.get_number(), student.get_matric(), student.get_name());
-
+                    i++;
+                    System.out.printf("| %-3s | %-6s | %-35s |\n", i, student.get_matric(), student.get_name());
+                    Row row = get_sheet.getRow(sheet1_row_counter);
+                    if (sheet1_row_counter == 0) {
+                        Cell cell1 = row.createCell(5);
+                        Cell cell2 = row.createCell(6);
+                        Cell cell3 = row.createCell(7);
+                        cell1.setCellValue(header2[0]);
+                        cell2.setCellValue(header2[1]);
+                        cell3.setCellValue(header2[2]);
+                        sheet1_row_counter++;
+                        row = get_sheet.getRow(sheet1_row_counter);
+                    }
+                    Cell cell1 = row.createCell(5);
+                    Cell cell2 = row.createCell(6);
+                    Cell cell3 = row.createCell(7);
+                    cell1.setCellValue(i);
+                    cell2.setCellValue(student.get_matric());
+                    cell3.setCellValue(student.get_name());
+                    sheet1_row_counter++;
                 }
             }
             System.out.println("______________________________________________________\n");
 
 
-            int comment_number = 0;
-            int counter = 0;
-            //int submission_number = 0;
-            System.out.println(" Issue 4 Submission");
-            System.out.println(" * Students who have submitted");
-            System.out.println("______________________________________________________");
-            System.out.printf("| %-3s | %-6s | %-35s |\n", "No.", "Matric", "Name");
-            System.out.println("|_____|________|_____________________________________|");
-            for (Student student : student_list) {
-                if (student.get_comment_number() != 0) {
-                    counter++; //!!!!!
-                    System.out.printf("| %-3d | %-6s | %-35s |\n", counter, student.get_matric(), student.get_name());
-                    comment_number++;
-                }
-            }
-            System.out.println("______________________________________________________");
-            System.out.printf(" Total number of comments : %d\n\n", comment_number);
 
-            System.out.println(" * Students who have not submitted");
-            System.out.println("______________________________________________________");
-            System.out.printf("| %-3s | %-6s | %-35s |\n", "No.", "Matric", "Name");
-            System.out.println("|_____|________|_____________________________________|");
+            //sheet1_row_counter = 0;
+            //i = 0;
+            //int submission_number = 0;
+//            System.out.println(" Issue 4 Submission");
+//            System.out.println(" * Students who have submitted");
+//            System.out.println("______________________________________________________");
+//            System.out.printf("| %-3s | %-6s | %-35s |\n", "No.", "Matric", "Name");
+//            System.out.println("|_____|________|_____________________________________|");
+//            for (Student student : student_list) {
+//                if (student.get_comment_number() != 0) {
+//                    i++; //!!!!!
+//                    System.out.printf("| %-3d | %-6s | %-35s |\n", i, student.get_matric(), student.get_name());
+//                    Row row = get_sheet.getRow(sheet1_row_counter);
+//                    if (sheet1_row_counter == 0) {
+//                        Cell cell1 = row.createCell(9);
+//                        Cell cell2 = row.createCell(10);
+//                        Cell cell3 = row.createCell(11);
+//                        cell1.setCellValue(header2[0]);
+//                        cell2.setCellValue(header2[1]);
+//                        cell3.setCellValue(header2[2]);
+//                        sheet1_row_counter++;
+//                        row = get_sheet.getRow(sheet1_row_counter);
+//                    }
+//                    Cell cell1 = row.createCell(9);
+//                    Cell cell2 = row.createCell(10);
+//                    Cell cell3 = row.createCell(11);
+//                    cell1.setCellValue(i);
+//                    cell2.setCellValue(student.get_matric());
+//                    cell3.setCellValue(student.get_name());
+//                    sheet1_row_counter++;
+
+//                }
+//            }
+//            System.out.println("______________________________________________________");
+
+            int comment_number = 0;
+            int submission_number = 0;
+            System.out.println(" Issue 4 Submission");
+            System.out.println(" * Students who have not submitted and have submitted more then one");
+            System.out.println("_________________________________________________________________");
+            System.out.printf("| %-3s | %-6s | %-35s | %-3s |\n", "No.", "Matric", "Name", "Comments");
+            System.out.println("|_____|________|_____________________________________|__________|");
+            sheet1_row_counter = 0;
+            i = 0;
             for (Student student : student_list) {
-                if (student.get_comment_number() == 0) {
-                    System.out.printf("| %-3s | %-6s | %-35s |\n", student.get_number(), student.get_matric(), student.get_name());
+                if (student.get_comment_number() == 0 || student.get_comment_number() > 1) {
+                    i++;
+                    System.out.printf("| %-3s | %-6s | %-35s | %-3s      |\n", i, student.get_matric(), student.get_name(), student.get_comment_number());
+                    Row row = get_sheet.getRow(sheet1_row_counter);
+                    if (sheet1_row_counter == 0) {
+                        Cell cell1 = row.createCell(9);
+                        Cell cell2 = row.createCell(10);
+                        Cell cell3 = row.createCell(11);
+                        Cell cell4 = row.createCell(12);
+                        cell1.setCellValue(header2[0]);
+                        cell2.setCellValue(header2[1]);
+                        cell3.setCellValue(header2[2]);
+                        cell4.setCellValue(header2[3]);
+                        sheet1_row_counter++;
+                        row = get_sheet.getRow(sheet1_row_counter);
+                    }
+                    Cell cell1 = row.createCell(9);
+                    Cell cell2 = row.createCell(10);
+                    Cell cell3 = row.createCell(11);
+                    Cell cell4 = row.createCell(12);
+                    cell1.setCellValue(i);
+                    cell2.setCellValue(student.get_matric());
+                    cell3.setCellValue(student.get_name());
+                    cell4.setCellValue(student.get_comment_number());
+                    sheet1_row_counter++;
+                }
+                //counting comment number
+                comment_number = comment_number + student.get_comment_number();
+                //counting submission number
+                if (student.get_comment_number() == 1 || student.get_comment_number() > 1){
+                    submission_number++;
                 }
             }
-            System.out.println("______________________________________________________");
+            System.out.println("_________________________________________________________________");
+            System.out.printf(" Total number of comments    : %d\n", comment_number);
+            System.out.printf(" Total number of submission  : %d\n", submission_number);
+            System.out.printf(" Total number of students    : %d\n", student_list.size());
+            //Auto size every column in excel file
+            for (int j = 0; j<16; j++){
+                get_sheet.autoSizeColumn(j);
+            }
+
+            FileOutputStream excel_file = new FileOutputStream("issues-result.xlsx");
+            xlsx_workbook.write(excel_file);
+            //xlsx_workbook.setHidden(false);
+            excel_file.close();
+            //xlsx_workbook.close();
         } catch(Exception e){
             e.printStackTrace();
         }
